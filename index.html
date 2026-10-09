@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="description" content="QCity Bitcoin Terminal v15 — real cryptographic and network toolkit">
+<title>QCity Bitcoin Terminal v15 — REAL</title>
+<style>
+:root{--acc:#00ff41;--acc2:#00a82d;--dim:#005f18;--yellow:#ffcc00;--cyan:#00d9ff;--red:#ff2b4e;--purple:#b26bff;--glow:1;--panel:rgba(0,20,8,.85)}
+body.t-amber{--acc:#ffb000;--acc2:#c27f00;--dim:#5c3d00;--panel:rgba(24,14,0,.85)}
+body.t-cyan{--acc:#00d9ff;--acc2:#009fc2;--dim:#06526b;--panel:rgba(0,14,20,.85)}
+body.t-red{--acc:#ff2b4e;--acc2:#c21733;--dim:#5c0f1e;--panel:rgba(20,0,4,.85)}
+body.t-purple{--acc:#b26bff;--acc2:#8a3ffc;--dim:#3d1a6e;--panel:rgba(10,2,22,.85)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#000;color:var(--acc);font-family:'Courier New',monospace;font-size:13px;overflow-x:hidden;-webkit-text-size-adjust:100%}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--acc2);border-radius:3px}
+::selection{background:var(--acc);color:#000}
+.bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#shader{opacity:.25}#neural{opacity:.35}#matrix{opacity:.13}
+#scan{height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);box-shadow:0 0 calc(18px*var(--glow)) var(--acc);animation:scanm 4s linear infinite}
+@keyframes scanm{0%{top:-2px}100%{top:100%}}
+#vig{background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.92) 100%)}
+#crt{z-index:1;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;display:none}
+body.flick #app,body.flick #crt{animation:flk 7s infinite}
+@keyframes flk{0%,100%{opacity:1}92%{opacity:1}93%{opacity:.86}94%{opacity:1}96%{opacity:.94}97%{opacity:1}}
+#pal{position:fixed;inset:0;z-index:300;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.8);padding:12vh 16px 0}
+#pal.on{display:flex}
+#pal .pbox{width:min(600px,94vw);background:#000;border:1px solid var(--acc);border-radius:8px;box-shadow:0 0 30px rgba(0,255,65,.35);overflow:hidden}
+#palInput{width:100%;background:#000;border:none;border-bottom:1px solid var(--acc2);color:var(--acc);padding:12px 14px;font-family:inherit;font-size:13px;outline:none}
+#palList{max-height:320px;overflow-y:auto}
+.pal-it{display:flex;justify-content:space-between;gap:10px;padding:9px 14px;font-size:11px;color:var(--acc2);cursor:pointer;border-bottom:1px dashed rgba(0,255,65,.08)}
+.pal-it .pa{color:var(--acc);font-weight:700}.pal-it .ph{font-size:9px;opacity:.7}
+.pal-it.sel{background:rgba(0,255,65,.12)}
+#toasts{position:fixed;right:12px;bottom:12px;z-index:350;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:#000;border:1px solid var(--acc2);border-left:3px solid var(--acc);color:var(--acc);font-size:10px;padding:8px 12px;border-radius:4px;max-width:300px;word-break:break-word;animation:tin .25s}
+.toast.t-wa{border-left-color:var(--yellow);color:var(--yellow)}
+.toast.t-er{border-left-color:var(--red);color:var(--red)}
+.toast.t-if{border-left-color:var(--cyan);color:var(--cyan)}
+@keyframes tin{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+#hud{position:fixed;left:10px;bottom:10px;z-index:250;background:rgba(0,0,0,.75);border:1px solid var(--acc2);border-radius:6px;padding:5px 8px;font-size:9px;color:var(--acc2);display:flex;align-items:center;gap:8px;pointer-events:none}
+#hud b{color:var(--acc)}
+#panic{position:fixed;inset:0;z-index:500;background:#fff;color:#222;font-family:Arial,sans-serif;display:none;overflow:auto}
+#panic.on{display:block}
+#panic .pbar{background:#217346;color:#fff;padding:8px 14px;font-size:13px;font-weight:700;display:flex;justify-content:space-between}
+#panic .ptools{background:#f3f3f3;border-bottom:1px solid #d4d4d4;padding:6px 14px;font-size:11px;color:#444;display:flex;gap:14px;flex-wrap:wrap}
+#panic table{border-collapse:collapse;font-size:12px}
+#panic td,#panic th{border:1px solid #d4d4d4;padding:4px 10px;min-width:86px;text-align:right}
+#panic th{background:#f3f3f3;color:#666;font-weight:400;text-align:center;min-width:40px}
+#panic td.hd{background:#f3f3f3;color:#666;text-align:center;min-width:40px}
+#panic td.up{color:#217346}#panic td.dn{color:#c00000}
+#modal{position:fixed;inset:0;z-index:320;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92);padding:20px}
+#modal.on{display:flex}
+#modal .box{background:#001005;border:1px solid var(--acc);border-radius:8px;padding:18px;max-width:620px;width:100%;box-shadow:0 0 25px rgba(0,255,65,.4);max-height:84vh;overflow-y:auto}
+#modal h3{color:var(--acc);font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+#modal p{color:var(--acc2);font-size:11px;line-height:1.6;margin:6px 0}
+#app{position:relative;z-index:10;max-width:900px;margin:0 auto;padding:12px 12px 60px}
+#head{text-align:center;padding:4px 0 8px}
+#head h1{font-size:24px;color:var(--acc);letter-spacing:4px;font-weight:900;text-shadow:0 0 calc(12px*var(--glow)) var(--acc);display:inline-block}
+#head h1 .ult{color:var(--yellow)}
+#head .sub{font-size:9px;color:var(--acc2);letter-spacing:3px;margin-top:4px}
+.banner{background:var(--panel);border:1px solid var(--acc2);border-radius:6px;padding:8px 12px;margin:8px 0;font-size:11px;min-height:30px;display:flex;align-items:center;gap:6px;overflow:hidden}
+.banner .p{color:var(--acc);font-weight:700;flex-shrink:0}
+.banner .t{color:var(--acc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.banner .c{display:inline-block;width:8px;height:12px;background:var(--acc);animation:bl 1s steps(2) infinite;flex-shrink:0}
+@keyframes bl{50%{opacity:0}}
+#ipb{background:var(--panel);border:1px solid var(--acc);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:11px}
+#ipb .ir{display:flex;justify-content:space-between;padding:2px 0;gap:8px}
+#ipb .lb{color:var(--acc2);font-size:10px;flex-shrink:0}
+#ipb .vl{color:var(--acc);font-weight:700;text-align:right;word-break:break-all}
+#ipb .vl.h{color:var(--yellow)}#ipb .vl.t{color:var(--cyan)}
+#ipb .st{color:var(--yellow);font-size:9px;margin-top:4px}
+#news{background:var(--panel);border:1px solid var(--acc2);border-radius:6px;height:26px;margin-bottom:8px;overflow:hidden}
+#news .ni{white-space:nowrap;padding-left:100%;line-height:26px;animation:nr 90s linear infinite;font-size:10px;color:var(--acc)}
+#news .it{padding-right:30px}
+@keyframes nr{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+#status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:6px 10px;background:var(--panel);border:1px solid var(--dim);border-radius:6px;font-size:9px;color:var(--acc2);margin-bottom:8px}
+#status .lv{color:var(--acc)}
+#stats{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px}
+.stat{background:var(--panel);border:1px solid var(--dim);border-radius:5px;padding:6px 3px;text-align:center}
+.stat .l{font-size:7px;color:var(--acc2);margin-bottom:2px}
+.stat .v{font-size:11px;font-weight:700;color:var(--acc)}
+#tabbar{display:flex;gap:3px;margin-bottom:10px;padding:4px;background:var(--panel);border:1px solid var(--acc2);border-radius:8px;overflow-x:auto;scrollbar-width:none}
+#tabbar::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;background:transparent;color:var(--acc2);border:none;padding:7px 10px;border-radius:5px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--acc)}
+.tab.on{background:rgba(0,255,65,.15);color:var(--acc);box-shadow:inset 0 0 10px rgba(0,255,65,.12)}
+.pane{display:none}.pane.on{display:block;animation:fi .25s}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+h2.sec{color:var(--acc2);font-size:11px;letter-spacing:2px;margin:16px 0 8px;text-transform:uppercase;font-weight:700}
+h2.sec:first-child{margin-top:0}
+h2.sec::before{content:'▸ '}
+.card{background:var(--panel);border:1px solid var(--acc2);border-radius:8px;padding:12px;margin-bottom:10px}
+.card h3{font-size:10px;color:var(--acc2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.kv{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed rgba(0,255,65,.15);font-size:11px;line-height:1.5;gap:8px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--acc2);flex-shrink:0;margin-right:8px}
+.kv .v{color:var(--acc);font-weight:600;text-align:right;word-break:break-all;font-family:monospace}
+.kv .v.pos{color:var(--acc)}.kv .v.neg{color:var(--red)}.kv .v.warn{color:var(--yellow)}
+input.inp,textarea.inp,select.inp{width:100%;background:#000;border:1px solid var(--acc2);color:var(--acc);padding:9px 11px;border-radius:5px;font-family:inherit;font-size:11px;outline:none;margin-bottom:8px}
+input.inp:focus,textarea.inp:focus,select.inp:focus{border-color:var(--acc);box-shadow:0 0 10px rgba(0,255,65,.3)}
+input.inp::placeholder,textarea.inp::placeholder{color:var(--dim)}
+textarea.inp{min-height:80px;resize:vertical;font-family:monospace}
+.out{background:#000;border:1px solid var(--acc2);color:var(--cyan);padding:9px 11px;border-radius:5px;font-family:monospace;font-size:10px;word-break:break-all;line-height:1.6;min-height:40px;white-space:pre-wrap}
+.btn{background:rgba(0,255,65,.08);color:var(--acc);border:1px solid var(--acc);padding:7px 12px;border-radius:5px;font-family:inherit;font-weight:700;cursor:pointer;font-size:10px;margin:0 4px 6px 0;display:inline-block;transition:all .15s;user-select:none}
+.btn:hover{background:var(--acc);color:#000;box-shadow:0 0 12px var(--acc)}
+.btn.red{border-color:var(--red);color:var(--red)}.btn.red:hover{background:var(--red);color:#000}
+.btn.blue{border-color:var(--cyan);color:var(--cyan)}.btn.blue:hover{background:var(--cyan);color:#000}
+.btn.yellow{border-color:var(--yellow);color:var(--yellow)}.btn.yellow:hover{background:var(--yellow);color:#000}
+.btn.wide{width:100%;margin:6px 0}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.wbtn{width:100%;background:var(--panel);border:1px solid var(--acc2);border-radius:7px;padding:10px 12px;margin-bottom:7px;cursor:pointer;color:var(--acc);font-family:inherit;font-size:11px;display:flex;align-items:center;gap:10px;text-align:left;transition:all .15s}
+.wbtn:hover{border-color:var(--acc);box-shadow:0 0 12px rgba(0,255,65,.4)}
+.wbtn .ic{width:28px;height:28px;border:1px solid var(--acc2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.wbtn .nm{flex:1}.wbtn .n{font-weight:700;color:var(--acc);font-size:11px;letter-spacing:1px;display:block}
+.wbtn .d{font-size:9px;color:var(--acc2);margin-top:2px;display:block}
+.wbtn .st{font-size:9px;color:var(--acc2);flex-shrink:0}
+.wbtn.live .st{color:var(--acc)}.wbtn.live{border-color:var(--acc)}
+#acct{display:none;background:var(--panel);border:1px solid var(--acc);border-radius:8px;padding:12px;margin-bottom:10px}
+#acct h4{font-size:10px;color:var(--acc2);letter-spacing:2px;margin-bottom:6px;text-transform:uppercase}
+#acct .ad{font-family:monospace;font-size:11px;color:var(--acc);word-break:break-all;margin-bottom:8px}
+#term,#cout{background:#000;border:1px solid var(--acc2);border-radius:6px;padding:10px;font-family:monospace;font-size:11px;line-height:1.5;color:var(--acc);overflow-y:auto}
+#term{height:300px;margin-bottom:8px}#cout{height:240px;margin-bottom:8px}
+#term .ln,#cout>div{margin-bottom:1px;word-break:break-all;white-space:pre-wrap}
+.ok{color:var(--acc)}.er{color:var(--red)}.wa{color:var(--yellow)}.if{color:var(--cyan)}.dm{color:var(--dim)}.pu{color:var(--purple)}
+.cinput{display:flex;gap:6px;align-items:center}
+.cinput .ps{color:var(--acc);font-weight:700;flex-shrink:0}
+.cinput input{flex:1;background:#000;border:1px solid var(--acc2);color:var(--acc);padding:9px 11px;border-radius:5px;font-family:inherit;font-size:11px;outline:none}
+.cinput input:focus{border-color:var(--acc)}
+.bar{height:6px;background:var(--dim);border-radius:3px;overflow:hidden;margin:4px 0}
+.bar .fill{height:100%;background:var(--acc);transition:width .3s;box-shadow:0 0 8px var(--acc)}
+.warn{color:var(--yellow);font-size:9px;line-height:1.6;margin-top:4px}
+.danger{color:var(--red);font-size:9px;line-height:1.6;margin-top:4px}
+.themes{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.tdot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,.2);transition:transform .15s}
+.tdot:hover{transform:scale(1.1)}.tdot.sel{border-color:#fff;box-shadow:0 0 12px currentColor}
+#crackOut{background:#000;border:1px solid var(--acc2);border-radius:6px;padding:10px;font-family:monospace;font-size:11px;line-height:1.6;color:var(--acc);height:240px;overflow-y:auto;margin-bottom:8px;white-space:pre-wrap}
+#crackBar{height:14px;background:#001005;border:1px solid var(--acc2);border-radius:4px;overflow:hidden;margin-bottom:8px}
+#crackBar .fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0%;transition:width .15s}
+.reqtable{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:10px}
+.reqtable th{background:rgba(0,255,65,.08);color:var(--acc);padding:7px 6px;border:1px solid var(--dim);font-size:9px;letter-spacing:1px;text-align:left}
+.reqtable td{padding:6px;border:1px solid var(--dim);color:var(--acc2);vertical-align:top}
+.reqtable td.rq{color:var(--acc);font-weight:700}.reqtable td.yours{color:var(--cyan);font-weight:700}
+.badge{display:inline-block;padding:1px 7px;border-radius:3px;font-size:8px;font-weight:700;letter-spacing:1px}
+.badge.pass{background:rgba(0,255,65,.15);color:var(--acc);border:1px solid var(--acc)}
+.badge.warn{background:rgba(255,204,0,.12);color:var(--yellow);border:1px solid var(--yellow)}
+.badge.fail{background:rgba(255,43,78,.12);color:var(--red);border:1px solid var(--red)}
+.verdict{border:1px solid var(--acc);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:var(--panel);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.verdict .vt{font-size:15px;font-weight:900;letter-spacing:2px;color:var(--acc);text-shadow:0 0 10px var(--acc)}
+.verdict .vd{font-size:9px;color:var(--acc2);flex:1;min-width:180px;line-height:1.5}
+.presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-bottom:10px}
+.preset{background:var(--panel);border:1px solid var(--acc2);border-radius:7px;padding:9px 10px;cursor:pointer;transition:all .15s;text-align:left;font-family:inherit}
+.preset:hover{border-color:var(--acc)}.preset.on{border-color:var(--acc);box-shadow:0 0 14px rgba(0,255,65,.4) inset}
+.preset .pn{color:var(--acc);font-weight:900;font-size:10px;letter-spacing:1px;display:block}
+.preset .pd{color:var(--acc2);font-size:8px;line-height:1.5;display:block;margin-top:4px}
+.slrow{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed rgba(0,255,65,.12);font-size:10px}
+.slrow:last-child{border-bottom:none}
+.slrow .sl-k{color:var(--acc2);width:130px;flex-shrink:0;font-size:9px;letter-spacing:1px}
+.slrow input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--dim);border-radius:2px;outline:none;cursor:pointer}
+.slrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);cursor:pointer}
+.slrow input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--acc);border:none}
+.slrow .sl-v{color:var(--acc);font-weight:700;width:64px;text-align:right;flex-shrink:0;font-size:10px}
+.tglrow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed rgba(0,255,65,.12);font-size:10px}
+.tglrow:last-child{border-bottom:none}
+.tglrow .tk{color:var(--acc2)}.tglrow .td2{font-size:8px;color:var(--dim);margin-top:1px}
+.switch{position:relative;width:34px;height:18px;flex-shrink:0;cursor:pointer}
+.switch input{opacity:0;width:0;height:0}
+.switch .tr{position:absolute;inset:0;background:var(--dim);border-radius:9px;transition:.15s}
+.switch .tr::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#000;border-radius:50%;transition:.15s;border:1px solid var(--acc2)}
+.switch input:checked + .tr{background:var(--acc)}
+.switch input:checked + .tr::before{transform:translateX(16px);border-color:#000}
+input[type=checkbox].cbx{accent-color:var(--acc);width:14px;height:14px;cursor:pointer}
+#priceBig{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+#priceBig .pb1{font-size:26px;font-weight:900;color:var(--acc);text-shadow:0 0 14px var(--acc)}
+#priceBig .pb2{font-size:12px;font-weight:700}
+#chart{width:100%;height:220px;background:#000;border:1px solid var(--acc2);border-radius:6px;display:block}
+.tfrow{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap}
+.tf{background:transparent;border:1px solid var(--dim);color:var(--acc2);font-family:inherit;font-size:9px;font-weight:700;padding:4px 10px;border-radius:4px;cursor:pointer}
+.tf.on{border-color:var(--acc);color:var(--acc);background:rgba(0,255,65,.1)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.mgrid{grid-template-columns:1fr}}
+.gaugewrap{text-align:center}
+#gauge{width:100%;max-width:220px;height:auto;display:block;margin:0 auto}
+#fngVal{font-size:20px;font-weight:900;margin-top:-4px}
+#fngCls{font-size:10px;letter-spacing:2px;margin-top:2px}
+#halfBar{height:10px;background:var(--dim);border-radius:4px;overflow:hidden;margin:6px 0}
+#halfFill{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));box-shadow:0 0 10px var(--acc);transition:width .5s}
+.feerow{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.fee{flex:1;min-width:70px;background:#000;border:1px solid var(--dim);border-radius:5px;text-align:center;padding:7px 3px}
+.fee .fl{font-size:7px;color:var(--acc2);letter-spacing:1px}
+.fee .fv{font-size:12px;color:var(--acc);font-weight:900;margin-top:2px}
+.fee .fu{font-size:7px;color:var(--dim)}
+.addrrow{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed rgba(0,255,65,.12);font-size:10px;align-items:center}
+.addrrow:last-child{border-bottom:none}
+.addrrow .ak{color:var(--acc2);flex-shrink:0;width:120px;font-size:9px;letter-spacing:1px}
+.addrrow .av{color:var(--acc);font-family:monospace;font-size:10px;word-break:break-all;text-align:right;cursor:pointer;flex:1}
+.addrrow .av:hover{text-shadow:0 0 8px var(--acc)}
+.addrrow .av::after{content:' ⧉';opacity:.4;font-size:9px}
+#foot{text-align:center;font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:16px;padding:8px 0}
+kbd.sc{background:#000;border:1px solid var(--acc2);border-radius:3px;padding:0 5px;font-size:9px;color:var(--acc);font-family:inherit}
+.hintbar{font-size:8px;color:var(--dim);letter-spacing:1px;margin-top:4px;text-align:center}
+table.dt{width:100%;border-collapse:collapse;font-size:10px}
+table.dt th{color:var(--acc2);text-align:left;padding:4px 6px;border-bottom:1px solid var(--dim);font-size:9px;letter-spacing:1px}
+table.dt td{padding:4px 6px;border-bottom:1px dashed rgba(0,255,65,.1);color:var(--acc);font-family:monospace;word-break:break-all}
+table.dt tr:hover td{background:rgba(0,255,65,.05)}
+@media(max-width:600px){
+  #head h1{font-size:16px;letter-spacing:2px}
+  #stats{grid-template-columns:repeat(3,1fr)}
+  .slrow .sl-k{width:90px}#priceBig .pb1{font-size:20px}
+  .reqtable{font-size:8px}.reqtable th,.reqtable td{padding:4px 3px}
+  .addrrow .ak{width:90px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="shader" class="bg"></canvas>
+<canvas id="neural" class="bg"></canvas>
+<canvas id="matrix" class="bg"></canvas>
+<div id="scan" class="bg"></div>
+<div id="vig" class="bg"></div>
+<div id="crt" class="bg"></div>
+
+<div id="pal"><div class="pbox"><input id="palInput" placeholder="command…  (esc to close)" autocomplete="off" spellcheck="false"><div id="palList"></div></div></div>
+<div id="toasts"></div>
+<div id="hud"><canvas id="hudc" width="110" height="30"></canvas><span id="hudt">—</span></div>
+
+<div id="panic">
+  <div class="pbar"><span>Q4_Portfolio_Forecast.xlsx — LibreOffice Calc</span><span>— ▢ ✕</span></div>
+  <div class="ptools"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Data</span><span>Tools</span><span>Window</span><span>Help</span></div>
+  <div id="panicGrid"></div>
+</div>
+
+<div id="modal" onclick="if(event.target===this)closeModal()"><div class="box"><h3 id="mTitle">Message</h3><div id="mBody"></div><button class="btn" onclick="closeModal()" style="margin-top:12px">CLOSE</button></div></div>
+
+<div id="app">
+  <div id="head">
+    <h1>QCITY BITCOIN <span class="ult">⬢</span></h1>
+    <div class="sub">[ v15 · REAL CRYPTO · REAL NETWORK · REAL CHAIN DATA ]</div>
+  </div>
+
+  <div class="banner"><span class="p">root@qcity:~#</span><span class="t" id="typ"></span><span class="c"></span></div>
+
+  <div id="ipb">
+    <div class="ir"><span class="lb">PUBLIC IP</span><span class="vl" id="ipReal">resolving…</span></div>
+    <div class="ir"><span class="lb">ASN / ISP</span><span class="vl" id="ipIsp">—</span></div>
+    <div class="ir"><span class="lb">LOCATION</span><span class="vl h" id="ipGeo">—</span></div>
+    <div class="ir"><span class="lb">TIMEZONE</span><span class="vl t" id="ipTz">—</span></div>
+    <div class="st" id="ipStat">&gt; querying ipwho.is…</div>
+  </div>
+
+  <div id="news"><div class="ni" id="newsInner"><span class="it">loading live chain data…</span></div></div>
+
+  <div id="status">
+    <span class="lv" id="netState">◉ CONNECTING</span>
+    <span id="clock">--:--:--</span>
+    <span>BLOCK <span id="nodeId">—</span></span>
+    <span>TIER <span id="tierTag" class="lv">—</span></span>
+    <span>UP <span id="uptime">0s</span></span>
+  </div>
+
+  <div id="stats">
+    <div class="stat"><div class="l">HASHRATE</div><div class="v" id="s1">—</div></div>
+    <div class="stat"><div class="l">DIFFICULTY</div><div class="v" id="s2">—</div></div>
+    <div class="stat"><div class="l">PEERS</div><div class="v" id="s3">—</div></div>
+    <div class="stat"><div class="l">MEMPOOL</div><div class="v" id="s4">—</div></div>
+    <div class="stat"><div class="l">FAST FEE</div><div class="v" id="s5">—</div></div>
+    <div class="stat"><div class="l">RTT</div><div class="v" id="s6">—</div></div>
+  </div>
+
+  <div id="tabbar"></div>
+
+  <!-- WALLET -->
+  <div class="pane on" id="p-wallet">
+    <div id="acct"><h4>◉ Injected Wallet</h4><div class="ad" id="aAd">—</div>
+      <div class="kv"><span class="k">Chain</span><span class="v" id="aCh">—</span></div>
+      <div class="kv"><span class="k">Balance</span><span class="v" id="aBal">—</span></div>
+      <button class="btn red wide" onclick="disconnectWallet()">DISCONNECT</button>
+    </div>
+    <h2 class="sec">Detected Injected Providers</h2>
+    <div class="card" id="provCard"><div class="kv"><span class="k">window.ethereum</span><span class="v" id="pvEth">—</span></div>
+      <div class="kv"><span class="k">window.unisat</span><span class="v" id="pvUni">—</span></div>
+      <div class="kv"><span class="k">window.LeatherProvider</span><span class="v" id="pvLea">—</span></div>
+      <div class="kv"><span class="k">window.XverseProviders</span><span class="v" id="pvXv">—</span></div>
+      <div class="kv"><span class="k">window.okxwallet</span><span class="v" id="pvOkx">—</span></div>
+      <div class="kv"><span class="k">window.phantom</span><span class="v" id="pvPh">—</span></div>
+    </div>
+    <button class="btn wide" onclick="detectWallets(true)">RESCAN PROVIDERS</button>
+    <h2 class="sec">EVM Connection</h2>
+    <button class="wbtn" onclick="connectEVM()"><div class="ic">🦊</div><div class="nm"><span class="n">CONNECT EVM WALLET</span><span class="d">eth_requestAccounts · real balance read</span></div><div class="st" id="evmSt">SCAN</div></button>
+    <h2 class="sec">Bitcoin Wallet Adapters</h2>
+    <button class="wbtn" onclick="connectUnisat()"><div class="ic">🟣</div><div class="nm"><span class="n">UNISAT</span><span class="d">real getAccounts + getBalance</span></div></button>
+    <button class="wbtn" onclick="connectXverse()"><div class="ic">₿</div><div class="nm"><span class="n">XVERSE</span><span class="d">sats-connect request('getAccounts')</span></div></button>
+    <button class="wbtn" onclick="connectLeather()"><div class="ic">🟠</div><div class="nm"><span class="n">LEATHER</span><span class="d">LeatherProvider.request('getAddresses')</span></div></button>
+    <button class="wbtn" onclick="connectOKX()"><div class="ic">⭕</div><div class="nm"><span class="n">OKX WALLET</span><span class="d">okxwallet.bitcoin.connect()</span></div></button>
+    <div class="warn">Bitcoin wallet adapters only work when this page is opened inside the wallet's in-app browser (or with the extension installed). No adapter → no connection. That is a real browser limitation, not a simulation.</div>
+  </div>
+
+  <!-- ADDRESS -->
+  <div class="pane" id="p-address">
+    <h2 class="sec">Bitcoin Address Analyzer</h2>
+    <input class="inp" id="aInput" placeholder="1… / 3… / bc1q… / bc1p… / tb1…" spellcheck="false">
+    <button class="btn" onclick="analyzeAddress()">VALIDATE</button>
+    <button class="btn blue" onclick="checkBalance()">BALANCE</button>
+    <button class="btn yellow" onclick="lookupAddressFull()">FULL SUMMARY</button>
+    <button class="btn blue" onclick="lookupUTXOUI()">UTXOs</button>
+    <button class="btn red" onclick="$('aOut').textContent='—'">CLEAR</button>
+    <div class="out" id="aOut" style="margin-top:8px">Paste a Bitcoin address. Validation includes real Base58Check / Bech32 / Bech32m checksum verification.</div>
+    <h2 class="sec">Batch Validator</h2>
+    <textarea class="inp" id="bInput" rows="5" placeholder="one address per line…"></textarea>
+    <button class="btn" onclick="batchCheck()">VALIDATE ALL</button>
+    <div class="out" id="bOut" style="margin-top:8px">—</div>
+    <h2 class="sec">Script PubKey</h2>
+    <div class="out" id="spkOut">—</div>
+  </div>
+
+  <!-- HASH -->
+  <div class="pane" id="p-hash">
+    <h2 class="sec">Hash Functions</h2>
+    <input class="inp" id="hInput" placeholder="input text…" value="QCity Bitcoin">
+    <button class="btn" onclick="doSHA256()">SHA-256</button>
+    <button class="btn" onclick="doDoubleSHA()">DOUBLE SHA-256</button>
+    <button class="btn" onclick="doSHA512()">SHA-512</button>
+    <button class="btn" onclick="doSHA1()">SHA-1</button>
+    <button class="btn yellow" onclick="doHMAC()">HMAC-SHA512 (key "Bitcoin seed")</button>
+    <button class="btn blue" onclick="doRIPEMD()">RIPEMD-160</button>
+    <button class="btn blue" onclick="doHASH160()">HASH-160</button>
+    <div class="card" style="margin-top:8px"><h3>Output</h3><div class="out" id="hOut">—</div></div>
+    <h2 class="sec">File Hash</h2>
+    <input class="inp" type="file" id="fileIn" onchange="hashFile()">
+    <div class="out" id="fileOut">select a file to compute real SHA-256 / SHA-512 locally</div>
+    <div class="warn">Everything hashes locally. No data leaves the browser. SHA-256/512/1 use WebCrypto when available; pure-JS SHA-256, SHA-512 and RIPEMD-160 fallbacks run when the context is not secure.</div>
+  </div>
+
+  <!-- ENCODE -->
+  <div class="pane" id="p-encode">
+    <h2 class="sec">Base58 · Base58Check · Bech32 · Bech32m · Hex · Base64</h2>
+    <input class="inp" id="eInput" placeholder="input…" value="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa">
+    <button class="btn" onclick="b58Check()">BASE58CHECK VERIFY</button>
+    <button class="btn" onclick="b58Encode()">BASE58 ENC</button>
+    <button class="btn" onclick="b58Decode()">BASE58 DEC</button>
+    <button class="btn yellow" onclick="bech32DecUI()">BECH32/BECH32M DECODE</button>
+    <button class="btn" onclick="hexEncode()">HEX ENC</button>
+    <button class="btn" onclick="hexDecode()">HEX DEC</button>
+    <button class="btn blue" onclick="base64Enc()">BASE64 ENC</button>
+    <button class="btn blue" onclick="base64Dec()">BASE64 DEC</button>
+    <button class="btn blue" onclick="urlEnc()">URL ENC</button>
+    <div class="card" style="margin-top:8px"><h3>Output</h3><div class="out" id="eOut">—</div></div>
+  </div>
+
+  <!-- KEYS -->
+  <div class="pane" id="p-keys">
+    <h2 class="sec">Key Generation</h2>
+    <div class="out" id="pkOut">—</div>
+    <button class="btn" onclick="genPrivKey()">GENERATE (crypto.getRandomValues)</button>
+    <button class="btn blue" onclick="copyEl('pkOut')">COPY</button>
+    <button class="btn yellow" onclick="deriveFromPkOut()">DERIVE ADDRESSES ▸</button>
+    <div class="warn">Uses the platform CSPRNG. Rejection-sampled to stay strictly inside [1, n-1].</div>
+
+    <h2 class="sec">WIF Encode / Decode</h2>
+    <input class="inp" id="wifIn" placeholder="64 hex chars (private key)">
+    <button class="btn" onclick="wifEncode(false)">WIF UNCOMPRESSED</button>
+    <button class="btn" onclick="wifEncode(true)">WIF COMPRESSED</button>
+    <div class="out" id="wifOut">—</div>
+    <input class="inp" id="wifDecIn" placeholder="WIF (5… / K… / L…)" style="margin-top:8px">
+    <button class="btn" onclick="wifDecode()">DECODE WIF</button>
+    <div class="out" id="wifDecOut">—</div>
+
+    <h2 class="sec">Entropy / Passphrase Strength</h2>
+    <input class="inp" id="entIn" placeholder="type a passphrase…" oninput="updateEntropy()">
+    <div class="bar"><div class="fill" id="entBar" style="width:0%"></div></div>
+    <div class="out" id="entOut">—</div>
+
+    <h2 class="sec">Vanity Address Generator (REAL, in-browser)</h2>
+    <input class="inp" id="vanIn" placeholder="prefix (e.g. QC, 1QC, bc1q… )" value="QC">
+    <select class="inp" id="vanType">
+      <option value="p2pkh">P2PKH (starts with 1)</option>
+      <option value="p2wpkh">P2WPKH (starts with bc1q)</option>
+    </select>
+    <button class="btn" onclick="genVanity()">START SEARCH</button>
+    <button class="btn red" onclick="stopVanity()">STOP</button>
+    <div class="bar"><div class="fill" id="vanBar" style="width:0%"></div></div>
+    <div class="out" id="vanOut">—</div>
+    <div class="warn">Incremental point addition over secp256k1 — real key search. Difficulty ≈ 58^len for P2PKH, 32^len for bech32. Each extra character multiplies the expected time by that factor. 4+ characters will take a very long time in a browser.</div>
+  </div>
+
+  <!-- SEED -->
+  <div class="pane" id="p-seed">
+    <h2 class="sec">BIP39</h2>
+    <div class="card">
+      <div class="kv"><span class="k">Wordlist</span><span class="v warn" id="wlStat">loading…</span></div>
+      <div class="kv"><span class="k">Checksum</span><span class="v" id="wlMode">—</span></div>
+      <div class="kv"><span class="k">Source</span><span class="v" id="wlSrc">—</span></div>
+      <button class="btn" onclick="reloadWordlist()" style="margin-top:6px">RELOAD WORDLIST</button>
+    </div>
+    <div class="card">
+      <h3>Generate Mnemonic</h3>
+      <button class="btn" onclick="genMnemonic(12)">12</button>
+      <button class="btn" onclick="genMnemonic(15)">15</button>
+      <button class="btn" onclick="genMnemonic(18)">18</button>
+      <button class="btn" onclick="genMnemonic(21)">21</button>
+      <button class="btn" onclick="genMnemonic(24)">24</button>
+      <div class="out" id="mnOut" style="margin-top:8px">—</div>
+      <div class="out" id="mnMeta" style="margin-top:6px;min-height:20px">—</div>
+      <button class="btn blue" onclick="copyEl('mnOut')">COPY</button>
+      <button class="btn yellow" onclick="$('seedMn').value=$('mnOut').textContent">SEND TO SEED ▸</button>
+    </div>
+    <div class="card">
+      <h3>Mnemonic → BIP39 Seed</h3>
+      <textarea class="inp" id="seedMn" rows="2" placeholder="mnemonic words…"></textarea>
+      <input class="inp" id="seedPass" placeholder="optional passphrase (25th word)">
+      <button class="btn yellow" onclick="mnToSeed()">PBKDF2-HMAC-SHA512 · 2048</button>
+      <div class="out" id="seedOut" style="margin-top:8px">—</div>
+      <button class="btn blue" onclick="copyEl('seedOut')">COPY</button>
+    </div>
+    <div class="card">
+      <h3>Validate Mnemonic (real checksum)</h3>
+      <textarea class="inp" id="valMn" rows="2" placeholder="12/15/18/21/24 words…"></textarea>
+      <button class="btn" onclick="validateMnemonic()">VALIDATE</button>
+      <div class="out" id="valOut" style="margin-top:8px">—</div>
+    </div>
+  </div>
+
+  <!-- HD -->
+  <div class="pane" id="p-hd">
+    <h2 class="sec">BIP32 / BIP44 / BIP49 / BIP84 / BIP86 Derivation</h2>
+    <textarea class="inp" id="hdSeed" rows="2" placeholder="BIP39 mnemonic OR 64/128-hex seed…"></textarea>
+    <input class="inp" id="hdPass" placeholder="BIP39 passphrase (optional)" type="password">
+    <input class="inp" id="hdPath" value="m/84'/0'/0'/0/0" spellcheck="false">
+    <div>
+      <button class="btn" onclick="hdDerive()">DERIVE PATH</button>
+      <button class="btn blue" onclick="hdFromLastSeed()">USE LAST BIP39 SEED</button>
+      <button class="btn blue" onclick="hdFromMnemonic()">USE MNEMONIC ABOVE</button>
+    </div>
+    <div class="out" id="hdOut" style="margin-top:8px">Enter a mnemonic or seed and a derivation path.</div>
+    <h2 class="sec">Batch Address Table</h2>
+    <input class="inp" id="hdBatchPath" value="m/84'/0'/0'/0" spellcheck="false">
+    <input class="inp" id="hdBatchN" value="10" placeholder="count (1-50)">
+    <button class="btn" onclick="hdBatch()">GENERATE ADDRESSES</button>
+    <div class="out" id="hdBatchOut" style="margin-top:8px;max-height:400px;overflow:auto">—</div>
+    <div class="warn">Standard paths: m/44'/0'/0'/0/i = legacy P2PKH · m/49'/0'/0'/0/i = P2SH-P2WPKH · m/84'/0'/0'/0/i = native SegWit · m/86'/0'/0'/0/i = Taproot.</div>
+  </div>
+
+  <!-- SIGN -->
+  <div class="pane" id="p-sign">
+    <h2 class="sec">ECDSA secp256k1 · RFC 6979 Deterministic</h2>
+    <input class="inp" id="sgKey" placeholder="private key hex (64)…">
+    <button class="btn" onclick="genSignKey()">GENERATE KEY</button>
+    <textarea class="inp" id="sgMsg" rows="3" placeholder="message to sign…">QCity Bitcoin Terminal</textarea>
+    <button class="btn yellow" onclick="signMessage()">SIGN MESSAGE</button>
+    <div class="out" id="sgOut" style="margin-top:8px">—</div>
+    <h2 class="sec">Verify Signature</h2>
+    <input class="inp" id="vfPub" placeholder="compressed/uncompressed pubkey hex or address…">
+    <textarea class="inp" id="vfMsg" rows="2" placeholder="original message…"></textarea>
+    <input class="inp" id="vfSig" placeholder="r||s hex (128 chars)…">
+    <button class="btn blue" onclick="verifyMessage()">VERIFY</button>
+    <div class="out" id="vfOut" style="margin-top:8px">—</div>
+    <div class="warn">Deterministic nonce per RFC 6979 — no RNG dependence, no nonce-reuse key leak. Low-S normalized per BIP62. This is the same math Bitcoin uses to authorize spends.</div>
+  </div>
+
+  <!-- TX -->
+  <div class="pane" id="p-tx">
+    <h2 class="sec">Raw Transaction Decoder</h2>
+    <textarea class="inp" id="txRaw" rows="4" placeholder="paste raw tx hex…"></textarea>
+    <button class="btn" onclick="decodeTx()">DECODE</button>
+    <button class="btn blue" onclick="fetchTxFromChain()">FETCH FROM CHAIN (txid)</button>
+    <div class="out" id="txDecOut" style="margin-top:8px">—</div>
+
+    <h2 class="sec">Transaction Builder &amp; Signer</h2>
+    <div class="card">
+      <h3>Inputs — one per line: txid:vout:sats:WIF</h3>
+      <textarea class="inp" id="txIns" rows="4" placeholder="abc123…:0:100000:L1a2b3…"></textarea>
+      <h3>Outputs — one per line: address:sats</h3>
+      <textarea class="inp" id="txOuts" rows="3" placeholder="bc1q…:90000"></textarea>
+      <button class="btn" onclick="buildTx(false)">BUILD &amp; SIGN (SIGHASH_ALL)</button>
+      <button class="btn" onclick="buildTx(true)">BUILD &amp; SIGN (BIP69 SORT)</button>
+      <div class="out" id="txBuildOut" style="margin-top:8px">—</div>
+      <button class="btn red wide" onclick="broadcastTx()">BROADCAST TO MEMPOOL.SPACE</button>
+      <div class="warn">Signing is real and offline. Broadcasting posts the signed hex to mempool.space — only do this with a transaction you actually intend to send. Testnet recommended while learning.</div>
+    </div>
+  </div>
+
+  <!-- CRACK -->
+  <div class="pane" id="p-crack">
+    <h2 class="sec">Real SHA-256 Dictionary / Brute-Force Attack</h2>
+    <input class="inp" id="crackHash" placeholder="target SHA-256 hash (64 hex)…" spellcheck="false">
+    <button class="btn" onclick="$('crackHash').value=$('hOut').textContent.trim();toast('hash loaded','ok')">USE LAST HASH</button>
+    <input class="inp" id="crackCharset" value="abcdefghijklmnopqrstuvwxyz0123456789">
+    <input class="inp" id="crackMax" value="4" placeholder="max brute-force length">
+    <button class="btn" onclick="startCrack('dict')">DICTIONARY ATTACK</button>
+    <button class="btn yellow" onclick="startCrack('mutate')">DICT + MUTATIONS</button>
+    <button class="btn red" onclick="startCrack('brute')">BRUTE FORCE</button>
+    <button class="btn red" onclick="stopCrack()">STOP</button>
+    <div id="crackBar"><div class="fill" id="crackFill"></div></div>
+    <div id="crackOut">Idle. Provide a SHA-256 hash and start an attack.</div>
+    <div class="out" id="crackResult" style="margin-top:8px">—</div>
+    <div class="warn">This is a real attack against real hashes — but only against passwords short enough to be guessable. A 256-bit Bitcoin private key has ~10^77 possibilities. Brute force against a properly generated key is not merely hard, it is physically impossible. This tool exists to demonstrate the difference between a weak password and a strong key.</div>
+  </div>
+
+  <!-- MARKET -->
+  <div class="pane" id="p-market">
+    <h2 class="sec">BTC / USDT</h2>
+    <div class="card">
+      <div id="priceBig"><span class="pb1" id="mkPrice">$ —</span><span class="pb2" id="mkChange">—</span></div>
+      <canvas id="chart"></canvas>
+      <div class="tfrow">
+        <button class="tf on" data-tf="1h" onclick="setTF(this)">1H</button>
+        <button class="tf" data-tf="4h" onclick="setTF(this)">4H</button>
+        <button class="tf" data-tf="1d" onclick="setTF(this)">1D</button>
+        <button class="tf" data-tf="1w" onclick="setTF(this)">1W</button>
+        <button class="tf" data-tf="1M" onclick="setTF(this)">1M</button>
+        <span style="flex:1"></span>
+        <button class="tf" onclick="loadMarket(true)">⟳</button>
+      </div>
+      <div class="kv"><span class="k">24h High / Low</span><span class="v" id="mkHL">—</span></div>
+      <div class="kv"><span class="k">24h Volume</span><span class="v" id="mkVol">—</span></div>
+      <div class="kv"><span class="k">Source</span><span class="v">Binance spot · 10s refresh</span></div>
+    </div>
+    <div class="mgrid">
+      <div class="card gaugewrap">
+        <h3>◆ Fear &amp; Greed</h3>
+        <canvas id="gauge" width="220" height="130"></canvas>
+        <div id="fngVal">—</div><div id="fngCls" class="wa">—</div>
+        <div class="warn" style="margin-top:6px">alternative.me</div>
+      </div>
+      <div class="card">
+        <h3>◆ Halving Countdown</h3>
+        <div class="kv"><span class="k">Height</span><span class="v" id="hvCur">—</span></div>
+        <div class="kv"><span class="k">Next halving</span><span class="v" id="hvNext">—</span></div>
+        <div class="kv"><span class="k">Blocks left</span><span class="v" id="hvLeft">—</span></div>
+        <div class="kv"><span class="k">ETA</span><span class="v warn" id="hvEta">—</span></div>
+        <div id="halfBar"><div id="halfFill" style="width:0%"></div></div>
+        <div class="kv"><span class="k">Epoch progress</span><span class="v" id="hvPct">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>◆ Mempool Fee Estimates</h3>
+      <div class="feerow">
+        <div class="fee"><div class="fl">FASTEST</div><div class="fv" id="fee1">—</div><div class="fu">sat/vB</div></div>
+        <div class="fee"><div class="fl">30 MIN</div><div class="fv" id="fee2">—</div><div class="fu">sat/vB</div></div>
+        <div class="fee"><div class="fl">1 HOUR</div><div class="fv" id="fee3">—</div><div class="fu">sat/vB</div></div>
+        <div class="fee"><div class="fl">ECONOMY</div><div class="fv" id="fee4">—</div><div class="fu">sat/vB</div></div>
+        <div class="fee"><div class="fl">MINIMUM</div><div class="fv" id="fee5">—</div><div class="fu">sat/vB</div></div>
+      </div>
+      <div class="kv" style="margin-top:8px"><span class="k">Mempool TX</span><span class="v" id="mpCount">—</span></div>
+      <div class="kv"><span class="k">Mempool size</span><span class="v" id="mpSize">—</span></div>
+      <div class="kv"><span class="k">Source</span><span class="v">mempool.space</span></div>
+    </div>
+  </div>
+
+  <!-- CHAIN -->
+  <div class="pane" id="p-chain">
+    <h2 class="sec">Live Bitcoin Network</h2>
+    <div class="card">
+      <h3>◆ Chain State</h3>
+      <div class="kv"><span class="k">Height</span><span class="v" id="xHeight">—</span></div>
+      <div class="kv"><span class="k">Best block</span><span class="v" id="xHash">—</span></div>
+      <div class="kv"><span class="k">Block time</span><span class="v" id="xTime">—</span></div>
+      <div class="kv"><span class="k">Difficulty</span><span class="v" id="xDiff">—</span></div>
+      <div class="kv"><span class="k">Hashrate</span><span class="v" id="xHashRate">—</span></div>
+      <div class="kv"><span class="k">Retarget in</span><span class="v" id="xRetarget">—</span></div>
+      <button class="btn" onclick="fetchExplorer(true)" style="margin-top:6px">REFRESH</button>
+    </div>
+    <div class="card">
+      <h3>◆ Recent Blocks</h3>
+      <div id="blockTable">—</div>
+    </div>
+    <h2 class="sec">Address Lookup</h2>
+    <input class="inp" id="xAddr" placeholder="paste BTC address…" value="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa">
+    <button class="btn" onclick="lookupAddress()">SUMMARY</button>
+    <button class="btn blue" onclick="lookupUTXOUI2()">UTXOs</button>
+    <button class="btn yellow" onclick="lookupTxs()">RECENT TXS</button>
+    <div class="out" id="xOut" style="margin-top:8px">—</div>
+    <h2 class="sec">Transaction Lookup</h2>
+    <input class="inp" id="xTxid" placeholder="txid…">
+    <button class="btn" onclick="lookupTx()">FETCH TX</button>
+    <div class="out" id="xTxOut" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- NET -->
+  <div class="pane" id="p-net">
+    <h2 class="sec">DNS over HTTPS (Cloudflare / Google)</h2>
+    <input class="inp" id="dnsName" value="bitcoin.org">
+    <select class="inp" id="dnsType">
+      <option>A</option><option>AAAA</option><option>MX</option><option>TXT</option>
+      <option>NS</option><option>CNAME</option><option>SOA</option><option>CAA</option><option>SRV</option>
+    </select>
+    <button class="btn" onclick="doDNS()">RESOLVE</button>
+    <button class="btn blue" onclick="doDNSAll()">ALL RECORDS</button>
+    <div class="out" id="dnsOut" style="margin-top:8px">—</div>
+
+    <h2 class="sec">TCP Reachability Probe (real browser-issued connections)</h2>
+    <input class="inp" id="scHost" placeholder="host or IP" value="127.0.0.1">
+    <input class="inp" id="scPorts" placeholder="ports e.g. 80,443,8333 or 1-1024" value="80,443,8333,8332,50001">
+    <input class="inp" id="scTimeout" value="2500" placeholder="timeout ms">
+    <div>
+      <button class="btn" onclick="startScan()">SCAN</button>
+      <button class="btn red" onclick="stopScan()">STOP</button>
+      <button class="btn blue" onclick="wsProbe()">WEBSOCKET PROBE</button>
+    </div>
+    <div class="out" id="scOut" style="margin-top:8px;height:260px;overflow-y:auto">Idle.</div>
+    <div class="warn">
+      Browsers are sandboxed and cannot open raw TCP sockets, so this uses real <code>fetch()</code> connections and measures the outcome:
+      a fast <b>TypeError</b> means the connection was refused (port closed), a <b>successful opaque response</b> means the port answered,
+      and a <b>timeout</b> means the packet was dropped (filtered).
+      Two caveats are unavoidable: HTTPS pages cannot open <code>http://</code> connections (mixed content), and Private Network Access blocks
+      requests from public pages to private IPs. When that happens the result is reported as <b>blocked-by-browser</b>, not as a fake result.
+    </div>
+  </div>
+
+  <!-- CONSOLE -->
+  <div class="pane" id="p-console">
+    <h2 class="sec">Interactive Shell</h2>
+    <div id="cout"></div>
+    <div class="cinput"><span class="ps">#</span><input id="cInput" placeholder="help · btc · block · addr &lt;x&gt; · derive &lt;hex&gt; · dns &lt;name&gt; · scan &lt;host&gt; …" autocomplete="off" spellcheck="false"><button class="btn" onclick="runConsole()">RUN</button></div>
+    <div class="hintbar">↑/↓ history · Ctrl+K palette · F9 panic · ? shortcuts</div>
+    <div class="card" style="margin-top:8px">
+      <h3>Commands</h3>
+      <div class="kv"><span class="k">help</span><span class="v">full command list</span></div>
+      <div class="kv"><span class="k">btc block fees fng halving mempool</span><span class="v">live chain data</span></div>
+      <div class="kv"><span class="k">addr &lt;x&gt; bal &lt;x&gt; utxo &lt;x&gt;</span><span class="v">address tools</span></div>
+      <div class="kv"><span class="k">hash dhash sha512 ripemd hash160 &lt;x&gt;</span><span class="v">hashing</span></div>
+      <div class="kv"><span class="k">wif &lt;hex&gt; unwif &lt;wif&gt; b58 &lt;hex&gt; b58d &lt;str&gt;</span><span class="v">encoding</span></div>
+      <div class="kv"><span class="k">derive &lt;hex&gt; sign &lt;hex&gt; &lt;msg&gt;</span><span class="v">crypto</span></div>
+      <div class="kv"><span class="k">hd &lt;mnemonic&gt; | path</span><span class="v">BIP32</span></div>
+      <div class="kv"><span class="k">dns &lt;name&gt; [type] · reverse &lt;ip&gt;</span><span class="v">DNS</span></div>
+      <div class="kv"><span class="k">scan &lt;host&gt; &lt;ports&gt; · probe &lt;host&gt; &lt;port&gt;</span><span class="v">network</span></div>
+      <div class="kv"><span class="k">tx &lt;rawhex&gt; · broadcast &lt;rawhex&gt;</span><span class="v">transactions</span></div>
+      <div class="kv"><span class="k">theme preset sysinfo bench clear panic version</span><span class="v">misc</span></div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="pane" id="p-log">
+    <h2 class="sec">Event Log</h2>
+    <div id="term"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn" onclick="exportLog()">EXPORT</button>
+      <button class="btn blue" onclick="lightning()">LIGHTNING</button>
+      <button class="btn red" onclick="clearLog()">CLEAR</button>
+    </div>
+    <h2 class="sec">Filter</h2>
+    <input class="inp" id="logFilter" placeholder="keyword…" oninput="filterLog()">
+  </div>
+
+  <!-- SYSTEM -->
+  <div class="pane" id="p-system">
+    <h2 class="sec">Detected Hardware</h2>
+    <div class="card" id="hwCard">
+      <div class="kv"><span class="k">CPU CORES</span><span class="v" id="hwCpu">—</span></div>
+      <div class="kv"><span class="k">MEMORY</span><span class="v" id="hwRam">—</span></div>
+      <div class="kv"><span class="k">GPU RENDERER</span><span class="v" id="hwGpu">—</span></div>
+      <div class="kv"><span class="k">WEBGL</span><span class="v" id="hwGl">—</span></div>
+      <div class="kv"><span class="k">DISPLAY</span><span class="v" id="hwScr">—</span></div>
+      <div class="kv"><span class="k">PIXEL RATIO</span><span class="v" id="hwDpr">—</span></div>
+      <div class="kv"><span class="k">PLATFORM</span><span class="v" id="hwPlat">—</span></div>
+      <div class="kv"><span class="k">CONNECTION</span><span class="v" id="hwNet">—</span></div>
+      <div class="kv"><span class="k">BATTERY</span><span class="v" id="hwBat">—</span></div>
+      <div class="kv"><span class="k">STORAGE</span><span class="v" id="hwSto">—</span></div>
+      <div class="kv"><span class="k">SECURE CONTEXT</span><span class="v" id="hwSec">—</span></div>
+    </div>
+    <button class="btn" onclick="detectHardware(true)">RESCAN</button>
+    <button class="btn yellow" onclick="runBenchmark()">RUN FPS BENCHMARK</button>
+    <button class="btn blue" onclick="cryptoBench()">CRYPTO BENCHMARK</button>
+
+    <h2 class="sec">Compatibility</h2>
+    <div class="verdict"><span class="vt" id="rvTier">CHECKING…</span><span class="vd" id="rvDesc">—</span></div>
+    <table class="reqtable">
+      <tr><th>COMPONENT</th><th>MIN</th><th>RECOMMENDED</th><th>ULTRA</th><th>DETECTED</th><th>STATUS</th></tr>
+      <tr><td class="rq">CPU cores</td><td>2</td><td>4</td><td>8+</td><td class="yours" id="rqCpu">—</td><td id="rsCpu">—</td></tr>
+      <tr><td class="rq">RAM</td><td>4 GB</td><td>8 GB</td><td>16 GB+</td><td class="yours" id="rqRam">—</td><td id="rsRam">—</td></tr>
+      <tr><td class="rq">WebGL</td><td>1</td><td>2</td><td>2 + HiDPI</td><td class="yours" id="rqGpu">—</td><td id="rsGpu">—</td></tr>
+      <tr><td class="rq">Display</td><td>1280×720</td><td>1920×1080</td><td>2560×1440+</td><td class="yours" id="rqScr">—</td><td id="rsScr">—</td></tr>
+      <tr><td class="rq">FPS</td><td>≥30</td><td>≥60</td><td>≥120</td><td class="yours" id="rqFps">—</td><td id="rsFps">—</td></tr>
+      <tr><td class="rq">Secure ctx</td><td colspan="2">required for WebCrypto</td><td>TLS/local</td><td class="yours" id="rqSec">—</td><td id="rsSec">—</td></tr>
+    </table>
+
+    <h2 class="sec">Performance Presets</h2>
+    <div class="presets" id="presetRow">
+      <button class="preset" data-p="POTATO" onclick="applyPreset('POTATO')"><span class="pn">POTATO</span><span class="pd">30fps · shader off · fx 25%</span></button>
+      <button class="preset" data-p="LOW" onclick="applyPreset('LOW')"><span class="pn">LOW</span><span class="pd">30fps · shader 50% · fx 40%</span></button>
+      <button class="preset" data-p="BALANCED" onclick="applyPreset('BALANCED')"><span class="pn">BALANCED</span><span class="pd">60fps · shader 75% · fx 70%</span></button>
+      <button class="preset" data-p="HIGH" onclick="applyPreset('HIGH')"><span class="pn">HIGH</span><span class="pd">60fps · shader 100% · fx 100%</span></button>
+      <button class="preset" data-p="ULTRA" onclick="applyPreset('ULTRA')"><span class="pn">ULTRA</span><span class="pd">uncapped · max · CRT</span></button>
+      <button class="preset" data-p="AUTO" onclick="applyPreset('AUTO')"><span class="pn">AUTO</span><span class="pd">benchmarks and adapts live</span></button>
+    </div>
+
+    <h2 class="sec">Fine Tuning</h2>
+    <div class="card">
+      <div class="slrow"><span class="sl-k">FPS CAP</span><input type="range" id="slFps" min="15" max="144" step="1" oninput="onSlider('fpsCap',this)"><span class="sl-v" id="svFps">60</span></div>
+      <div class="slrow"><span class="sl-k">MATRIX DENSITY</span><input type="range" id="slMat" min="0" max="130" step="5" oninput="onSlider('matrix',this)"><span class="sl-v" id="svMat">70%</span></div>
+      <div class="slrow"><span class="sl-k">NEURAL NODES</span><input type="range" id="slNeu" min="0" max="150" step="5" oninput="onSlider('neural',this)"><span class="sl-v" id="svNeu">80</span></div>
+      <div class="slrow"><span class="sl-k">SHADER RES</span><input type="range" id="slShd" min="0" max="100" step="5" oninput="onSlider('shader',this)"><span class="sl-v" id="svShd">100%</span></div>
+      <div class="slrow"><span class="sl-k">GLOW</span><input type="range" id="slGlow" min="0" max="150" step="5" oninput="onSlider('glow',this)"><span class="sl-v" id="svGlow">100%</span></div>
+      <div class="slrow"><span class="sl-k">SFX VOLUME</span><input type="range" id="slVol" min="0" max="100" step="5" oninput="onSlider('vol',this)"><span class="sl-v" id="svVol">40%</span></div>
+    </div>
+
+    <h2 class="sec">Toggles</h2>
+    <div class="card">
+      <div class="tglrow"><span><span class="tk">CRT filter</span><div class="td2">scanlines</div></span><label class="switch"><input type="checkbox" id="tgCrt" onchange="onToggle('crt',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Screen flicker</span><div class="td2">subtle CRT power flicker</div></span><label class="switch"><input type="checkbox" id="tgFlk" onchange="onToggle('flicker',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Scanline sweep</span><div class="td2">moving beam</div></span><label class="switch"><input type="checkbox" id="tgScan" onchange="onToggle('scan',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Sound FX</span><div class="td2">Web Audio</div></span><label class="switch"><input type="checkbox" id="tgSnd" onchange="onToggle('sound',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Ambient drone</span><div class="td2">low hum</div></span><label class="switch"><input type="checkbox" id="tgAmb" onchange="onToggle('ambient',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">HUD overlay</span><div class="td2">FPS + graph</div></span><label class="switch"><input type="checkbox" id="tgHud" onchange="onToggle('hud',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Toasts</span><div class="td2">event popups</div></span><label class="switch"><input type="checkbox" id="tgTst" onchange="onToggle('toasts',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Auto quality</span><div class="td2">drop fx when FPS falls</div></span><label class="switch"><input type="checkbox" id="tgAuto" onchange="onToggle('auto',this)"><span class="tr"></span></label></div>
+      <div class="tglrow"><span><span class="tk">Reduced motion</span><div class="td2">freeze background</div></span><label class="switch"><input type="checkbox" id="tgRm" onchange="onToggle('rm',this)"><span class="tr"></span></label></div>
+    </div>
+
+    <h2 class="sec">Live Performance</h2>
+    <div class="card">
+      <canvas id="perfGraph" width="600" height="60" style="width:100%;height:60px;background:#000;border:1px solid var(--dim);border-radius:5px;margin-bottom:8px"></canvas>
+      <div class="kv"><span class="k">FPS</span><span class="v" id="pfFps">—</span></div>
+      <div class="kv"><span class="k">Frame time</span><span class="v" id="pfMs">—</span></div>
+      <div class="kv"><span class="k">1% low</span><span class="v" id="pfLow">—</span></div>
+      <div class="kv"><span class="k">JS heap</span><span class="v" id="pfHeap">—</span></div>
+      <div class="kv"><span class="k">Preset</span><span class="v warn" id="pfPreset">—</span></div>
+      <div class="kv"><span class="k">Render bench</span><span class="v" id="pfBench">not run</span></div>
+      <div class="kv"><span class="k">Crypto bench</span><span class="v" id="pfCrypto">not run</span></div>
+    </div>
+
+    <h2 class="sec">Settings</h2>
+    <div class="card">
+      <button class="btn" onclick="exportSettings()">EXPORT</button>
+      <button class="btn blue" onclick="importSettings()">IMPORT</button>
+      <button class="btn red" onclick="factoryReset()">RESET</button>
+      <textarea class="inp" id="setIO" rows="3" placeholder="settings JSON…" style="margin-top:8px"></textarea>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="pane" id="p-config">
+    <h2 class="sec">Theme</h2>
+    <div class="themes">
+      <div class="tdot sel" data-th="green" style="background:#00ff41;color:#00ff41" onclick="setTheme('green')"></div>
+      <div class="tdot" data-th="amber" style="background:#ffb000;color:#ffb000" onclick="setTheme('amber')"></div>
+      <div class="tdot" data-th="cyan" style="background:#00d9ff;color:#00d9ff" onclick="setTheme('cyan')"></div>
+      <div class="tdot" data-th="red" style="background:#ff2b4e;color:#ff2b4e" onclick="setTheme('red')"></div>
+      <div class="tdot" data-th="purple" style="background:#b26bff;color:#b26bff" onclick="setTheme('purple')"></div>
+      <div class="tdot" data-th="custom" style="background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)" onclick="setTheme('custom')"></div>
+    </div>
+    <div class="card" id="hueCard" style="display:none">
+      <div class="slrow"><span class="sl-k">HUE</span><input type="range" id="slHue" min="0" max="360" step="1" value="150" oninput="onHue(this)"><span class="sl-v" id="svHue">150°</span></div>
+    </div>
+    <h2 class="sec">Background Effects</h2>
+    <div class="card">
+      <div class="kv"><span class="k">Matrix Rain</span><span class="v"><input type="checkbox" class="cbx" id="tgl-matrix" checked onchange="toggleEffect('matrix',this)"></span></div>
+      <div class="kv"><span class="k">Neural Net</span><span class="v"><input type="checkbox" class="cbx" id="tgl-neural" checked onchange="toggleEffect('neural',this)"></span></div>
+      <div class="kv"><span class="k">Shader</span><span class="v"><input type="checkbox" class="cbx" id="tgl-shader" checked onchange="toggleEffect('shader',this)"></span></div>
+      <div class="kv"><span class="k">Scanline</span><span class="v"><input type="checkbox" class="cbx" id="tgl-scan" checked onchange="toggleEffect('scan',this)"></span></div>
+    </div>
+    <h2 class="sec">Shortcuts</h2>
+    <div class="card">
+      <div class="kv"><span class="k"><kbd class="sc">Ctrl/⌘ K</kbd></span><span class="v">command palette</span></div>
+      <div class="kv"><span class="k"><kbd class="sc">F9</kbd></span><span class="v">panic screen</span></div>
+      <div class="kv"><span class="k"><kbd class="sc">Alt 1-9,0</kbd></span><span class="v">jump to tab</span></div>
+      <div class="kv"><span class="k"><kbd class="sc">?</kbd></span><span class="v">shortcut list</span></div>
+      <div class="kv"><span class="k"><kbd class="sc">Esc</kbd></span><span class="v">close overlay</span></div>
+    </div>
+    <h2 class="sec">Session</h2>
+    <div class="card">
+      <div class="kv"><span class="k">Session</span><span class="v" id="sessId">—</span></div>
+      <div class="kv"><span class="k">Started</span><span class="v" id="sessStart">—</span></div>
+      <div class="kv"><span class="k">Events</span><span class="v" id="sessEv">0</span></div>
+      <button class="btn" onclick="exportLog()">EXPORT LOG</button>
+      <button class="btn red" onclick="location.reload()">RELOAD</button>
+    </div>
+    <h2 class="sec">About</h2>
+    <div class="card">
+      <div class="kv"><span class="k">App</span><span class="v">QCity Bitcoin Terminal</span></div>
+      <div class="kv"><span class="k">Version</span><span class="v">15.0 REAL</span></div>
+      <div class="kv"><span class="k">Crypto</span><span class="v">SHA-1/256/512 · RIPEMD-160 · HASH-160 · HMAC-SHA256/512 · PBKDF2 · AES-GCM · Base58Check · Bech32/Bech32m · secp256k1 · ECDSA RFC6979 · BIP32/39/44/49/84/86 · BIP143 · BIP341</span></div>
+      <div class="kv"><span class="k">Network</span><span class="v">Binance · mempool.space · blockchain.info · alternative.me · Cloudflare DoH · ipwho.is</span></div>
+    </div>
+    <div class="warn" style="font-size:10px;line-height:1.7;margin-top:10px">
+      All cryptography runs locally in your browser. Nothing is uploaded. Live data is fetched directly from the public APIs listed above.
+      This tool never stores or transmits private keys. Browsers cannot open raw TCP sockets — the network panel works with real fetch/WebSocket connections and reports browser-level blocking honestly instead of inventing results.
+    </div>
+  </div>
+
+  <div id="foot">QCITY BITCOIN · v15 REAL · VERIFY EVERYTHING</div>
+</div>
+
+<script>
+"use strict";
+/* ════════════════════════ UTILITIES ════════════════════════ */
+const HEXC='0123456789abcdef';
+const rHex=n=>{let s='';for(let i=0;i<n;i++)s+=HEXC[Math.random()*16|0];return s;};
+const rInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const $=id=>document.getElementById(id);
+const enc=new TextEncoder();
+const dec=new TextDecoder();
+function hexToBytes(h){h=h.replace(/[^0-9a-f]/gi,'');if(h.length&1)h='0'+h;const o=new Uint8Array(h.length/2);for(let i=0;i<o.length;i++)o[i]=parseInt(h.substr(i*2,2),16);return o;}
+function bytesToHex(a){let s='';for(let i=0;i<a.length;i++)s+=HEXC[a[i]>>4]+HEXC[a[i]&15];return s;}
+function concatB(...arrs){let n=0;for(const a of arrs)n+=a.length;const o=new Uint8Array(n);let p=0;for(const a of arrs){o.set(a,p);p+=a.length;}return o;}
+function copyTxt(el){const t=el.textContent.trim();if(!t||t==='—')return;navigator.clipboard.writeText(t).then(()=>toast('copied','ok')).catch(()=>{});}
+function copyEl(id){const t=$(id).textContent;if(!t||t==='—')return;navigator.clipboard.writeText(t).then(()=>toast('copied','ok')).catch(()=>{});}
+function bytesToBig(b){return BigInt('0x'+(bytesToHex(b)||'0'));}
+function bigToBytes(n,len){const o=new Uint8Array(len);for(let i=len-1;i>=0;i--){o[i]=Number(n&255n);n>>=8n;}return o;}
+function varint(n){
+  if(n<0xfd)return new Uint8Array([n]);
+  if(n<=0xffff){const b=new Uint8Array(3);b[0]=0xfd;new DataView(b.buffer).setUint16(1,n,true);return b;}
+  if(n<=0xffffffff){const b=new Uint8Array(5);b[0]=0xfe;new DataView(b.buffer).setUint32(1,n,true);return b;}
+  const b=new Uint8Array(9);b[0]=0xff;new DataView(b.buffer).setBigUint64(1,BigInt(n),true);return b;
+}
+function rdVarint(dv,off){
+  const b=dv.getUint8(off);
+  if(b<0xfd)return[b,off+1];
+  if(b===0xfd)return[dv.getUint16(off+1,true),off+3];
+  if(b===0xfe)return[dv.getUint32(off+1,true),off+5];
+  return[Number(dv.getBigUint64(off+1,true)),off+9];
+}
+
+const SESSION_ID=rHex(16);
+const SESSION_START=new Date();
+let EVENT_COUNT=0;
+function bump(){EVENT_COUNT++;const e=$('sessEv');if(e)e.textContent=EVENT_COUNT;}
+
+/* ════════════════════════ SETTINGS ════════════════════════ */
+const DEF={preset:'BALANCED',fpsCap:60,matrix:70,neural:80,shader:100,glow:100,scan:true,crt:false,flicker:false,sound:true,vol:40,ambient:false,hud:true,toasts:true,auto:true,rm:false,theme:'green',hue:150,fx:{matrix:true,neural:true,shader:true,scan:true}};
+const PRESETS={
+  POTATO:{fpsCap:30,matrix:25,neural:20,shader:0,glow:30,crt:false,flicker:false,scan:false},
+  LOW:{fpsCap:30,matrix:40,neural:40,shader:50,glow:50,crt:false,flicker:false,scan:true},
+  BALANCED:{fpsCap:60,matrix:70,neural:80,shader:75,glow:80,crt:false,flicker:false,scan:true},
+  HIGH:{fpsCap:60,matrix:100,neural:110,shader:100,glow:100,crt:false,flicker:false,scan:true},
+  ULTRA:{fpsCap:144,matrix:130,neural:150,shader:100,glow:130,crt:true,flicker:false,scan:true}
+};
+let S;
+function loadSettings(){
+  try{const raw=localStorage.getItem('qcity15cfg');if(raw){const j=JSON.parse(raw);return Object.assign(JSON.parse(JSON.stringify(DEF)),j,{fx:Object.assign({},DEF.fx,j.fx||{})});}}catch(e){}
+  return JSON.parse(JSON.stringify(DEF));
+}
+function saveSettings(){try{localStorage.setItem('qcity15cfg',JSON.stringify(S));}catch(e){}}
+S=loadSettings();
+
+function hslHex(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12;const a=s*Math.min(l,1-l);
+  const f=n=>{const c=l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return Math.round(255*c).toString(16).padStart(2,'0');};
+  return '#'+f(0)+f(8)+f(4);}
+let accentCache=null;
+function accent(){if(!accentCache)accentCache=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#00ff41';return accentCache;}
+function applyCustomHue(h){S.hue=h;const r=document.documentElement.style;
+  r.setProperty('--acc',hslHex(h,100,55));r.setProperty('--acc2',hslHex(h,100,38));
+  r.setProperty('--dim',hslHex(h,100,20));r.setProperty('--panel',hslHex(h,80,6)+'d9');accentCache=null;}
+function setTheme(name,skipSave){
+  S.theme=name;
+  if(name==='custom'){document.body.className=document.body.className.replace(/\bt-\w+/g,'').trim();applyCustomHue(S.hue);$('hueCard').style.display='block';}
+  else{document.body.className=(name==='green'?'':'t-'+name)+(S.flicker?' flick':'');
+    const r=document.documentElement.style;['--acc','--acc2','--dim','--panel'].forEach(v=>r.removeProperty(v));
+    $('hueCard').style.display='none';accentCache=null;}
+  document.querySelectorAll('.tdot').forEach(d=>d.classList.toggle('sel',d.dataset.th===name));
+  if(!skipSave)saveSettings();
+}
+function applyPreset(name,quiet){
+  if(name==='AUTO'){S.preset='AUTO';S.auto=true;Object.assign(S,PRESETS[autoTier()]);if(!quiet)toast('AUTO tier selected','if');}
+  else{S.preset=name;S.auto=false;Object.assign(S,PRESETS[name]);}
+  document.querySelectorAll('.preset').forEach(p=>p.classList.toggle('on',p.dataset.p===name));
+  applySettingsUI();applyEngine();saveSettings();
+  if(!quiet)log('> preset: '+name,'ok');
+  $('tierTag').textContent=name;
+}
+function applySettingsUI(){
+  $('slFps').value=S.fpsCap;$('svFps').textContent=S.fpsCap>=144?'∞':S.fpsCap;
+  $('slMat').value=S.matrix;$('svMat').textContent=S.matrix+'%';
+  $('slNeu').value=S.neural;$('svNeu').textContent=S.neural;
+  $('slShd').value=S.shader;$('svShd').textContent=S.shader===0?'OFF':S.shader+'%';
+  $('slGlow').value=S.glow;$('svGlow').textContent=S.glow+'%';
+  $('slVol').value=S.vol;$('svVol').textContent=S.vol+'%';
+  $('tgCrt').checked=S.crt;$('tgFlk').checked=S.flicker;$('tgScan').checked=S.scan;
+  $('tgSnd').checked=S.sound;$('tgAmb').checked=S.ambient;$('tgHud').checked=S.hud;
+  $('tgTst').checked=S.toasts;$('tgAuto').checked=S.auto;$('tgRm').checked=S.rm;
+  $('tgl-matrix').checked=S.fx.matrix;$('tgl-neural').checked=S.fx.neural;
+  $('tgl-shader').checked=S.fx.shader;$('tgl-scan').checked=S.fx.scan;
+  $('pfPreset').textContent=S.preset;
+  document.querySelectorAll('.preset').forEach(p=>p.classList.toggle('on',p.dataset.p===S.preset));
+}
+function applyEngine(){
+  document.documentElement.style.setProperty('--glow',S.glow/100);
+  $('crt').style.display=S.crt?'block':'none';
+  $('scan').style.display=(S.scan&&S.fx.scan)?'':'none';
+  $('matrix').style.display=S.fx.matrix?'':'none';
+  $('neural').style.display=S.fx.neural?'':'none';
+  $('shader').style.display=(S.fx.shader&&S.shader>0)?'':'none';
+  $('hud').style.display=S.hud?'flex':'none';
+  document.body.classList.toggle('flick',S.flicker);
+  if(S.ambient)startAmbient();else stopAmbient();
+  if(masterGain)masterGain.gain.value=S.vol/100*0.5;
+  resizeBG();
+}
+function onSlider(k,el){
+  const v=parseInt(el.value);
+  if(k==='fpsCap'){S.fpsCap=v;$('svFps').textContent=v>=144?'∞':v;}
+  else if(k==='matrix'){S.matrix=v;$('svMat').textContent=v+'%';}
+  else if(k==='neural'){S.neural=v;$('svNeu').textContent=v;}
+  else if(k==='shader'){S.shader=v;$('svShd').textContent=v===0?'OFF':v+'%';}
+  else if(k==='glow'){S.glow=v;$('svGlow').textContent=v+'%';}
+  else if(k==='vol'){S.vol=v;$('svVol').textContent=v+'%';}
+  S.preset='CUSTOM';document.querySelectorAll('.preset').forEach(p=>p.classList.remove('on'));
+  $('pfPreset').textContent='CUSTOM';$('tierTag').textContent='CUSTOM';
+  applyEngine();saveSettings();
+}
+function onToggle(k,el){S[k]=el.checked;if(k==='ambient'&&!el.checked)stopAmbient();applyEngine();saveSettings();}
+function onHue(el){$('svHue').textContent=el.value+'°';applyCustomHue(parseInt(el.value));saveSettings();}
+function toggleEffect(id,cb){S.fx[id]=cb.checked;applyEngine();saveSettings();}
+function exportSettings(){$('setIO').value=JSON.stringify(S,null,1);toast('exported','if');}
+function importSettings(){
+  try{const j=JSON.parse($('setIO').value);
+    S=Object.assign(JSON.parse(JSON.stringify(DEF)),j,{fx:Object.assign({},DEF.fx,j.fx||{})});
+    setTheme(S.theme,true);applySettingsUI();applyEngine();saveSettings();toast('imported','ok');
+  }catch(e){toast('invalid JSON','er');}
+}
+function factoryReset(){localStorage.removeItem('qcity15cfg');S=loadSettings();setTheme(S.theme,true);applySettingsUI();applyEngine();toast('reset','wa');}
+
+/* ════════════════════════ AUDIO ════════════════════════ */
+let AC=null,masterGain=null,ambOsc=null;
+function ac(){
+  try{
+    if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();masterGain=AC.createGain();masterGain.gain.value=S.vol/100*0.5;masterGain.connect(AC.destination);}
+    if(AC.state==='suspended')AC.resume();
+    return AC;
+  }catch(e){return null;}
+}
+function beep(f,dur,type,vol,slide){
+  if(!S.sound)return;const c=ac();if(!c)return;
+  try{const o=c.createOscillator(),g=c.createGain();
+    o.type=type||'square';o.frequency.setValueAtTime(f,c.currentTime);
+    if(slide)o.frequency.exponentialRampToValueAtTime(slide,c.currentTime+dur);
+    g.gain.setValueAt
